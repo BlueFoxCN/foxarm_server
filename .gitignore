@@ -1,0 +1,10 @@
+*.pyc
+*.ipynb
+*.pkl
+*.npz
+*.npy
+*.bak
+*__pycache__*
+data
+code_gqcnn
+model_files
