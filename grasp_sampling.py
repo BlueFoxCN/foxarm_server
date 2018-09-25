@@ -8,8 +8,8 @@ from scipy import misc
 
 from cfgs.config import cfg
 
-# cx, cy, fx, fy = 322.7521286, 257.23471352, 578.04136686, 580.96473333 
-cx, cy, fx, fy = 298.55645619, 242.75084457, 596.24139992, 594.00542779
+cx, cy, fx, fy = 322.7521286, 257.23471352, 578.04136686, 580.96473333 
+# cx, cy, fx, fy = 298.55645619, 242.75084457, 596.24139992, 594.00542779
 GRIPPER_WIDTH_IN_PIXEL = 30
 
 def grasp_sample(raw_data, grasp_num, sub_dir):
@@ -74,10 +74,10 @@ def depth2cloud(sample, raw_data):
     p = ((p1 + p2) / 2).astype(np.int64)
     z = raw_data[p[0], p[1]]
 
-    y1 = (p1[0] * z - z * cy) / fy
-    x1 = (p1[1] * z - z * cx) / fx
-    y2 = (p2[0] * z - z * cy) / fy
-    x2 = (p2[1] * z - z * cx) / fx
+    y1 = ((p1[0] + cfg.crop_y_start) * z - z * cy) / fy
+    x1 = ((p1[1] + cfg.crop_x_start) * z - z * cx) / fx
+    y2 = ((p2[0] + cfg.crop_y_start) * z - z * cy) / fy
+    x2 = ((p2[1] + cfg.crop_x_start) * z - z * cx) / fx
 
     p1_3d = np.array([x1, y1, z])
     p2_3d = np.array([x2, y2, z])
