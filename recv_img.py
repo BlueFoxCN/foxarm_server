@@ -15,7 +15,7 @@ from cfgs.config import cfg
 def construct_conn():
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    addr = (cfg.local_ip, cfg.img_port)
+    addr = (cfg.img_ip, cfg.img_port)
     sock.bind(addr)
     sock.listen(1)
     print('Waiting for image connection...')
@@ -53,7 +53,8 @@ class RecvImgThread(Thread):
     def stop(self):
         self.recv = False
 
-    def get_img(self):
+    def get_img(self, sub_dir):
+        dir_path = os.path.join(cfg.save_dir, sub_dir)
         imgs_buffer = copy.deepcopy(self.imgs)
 
         img_process = imgs_buffer[0]
@@ -70,7 +71,7 @@ class RecvImgThread(Thread):
                 if num:
                     img_process[i, j] = int(np.sum(grid) / num)
 
-        save_path = os.path.join(cfg.save_dir, '%s.jpg' % datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+        save_path = os.path.join(dir_path, 'depth.jpg')
         misc.imsave(save_path, img_process)
         print('Done process imgs')
         return img_process
