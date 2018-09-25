@@ -22,4 +22,6 @@ cfg.height_bias = 145
 
 cfg.antipodal_th = 30
 
+cfg.z_num = 3
+
 cfg.save_dir = 'whole_pro_data'

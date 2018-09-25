@@ -70,7 +70,6 @@ while True:
         gqcnn_imgs, gqcnn_depths = align(crop_img,
                                          samples,
                                          table_height=cfg.table_height,
-                                         z_num=3,
                                          sub_dir=sub_dir)
         gqcnn_imgs = (gqcnn_imgs + cfg.height_bias) / 1000
         gqcnn_depths = (gqcnn_depths + cfg.height_bias) / 1000
@@ -79,7 +78,7 @@ while True:
         # choose the best sample, and transform it and send through tcp socket
         import pdb
         pdb.set_trace()
-        best_sample = samples[np.argmax(prediction[0][:, -1])]
+        best_sample = samples[np.argmax(prediction[0][:, -1]) // cfg.z_num]
         result_img = cv2.cvtColor(np.expand_dims(depth_img, -1).astype(np.uint8), cv2.COLOR_GRAY2BGR)
         p1 = best_sample[0][0:2]
         p2 = best_sample[1][0:2]

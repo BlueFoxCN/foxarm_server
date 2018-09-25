@@ -84,7 +84,7 @@ def depth2cloud(sample, raw_data):
 
     return p1_3d, p2_3d
 
-def align(raw_data, samples, table_height, z_num, sub_dir):
+def align(raw_data, samples, table_height, sub_dir):
     # rotate, crop and resize
     gqcnn_ims = []
     gqcnn_depth = []
@@ -103,7 +103,7 @@ def align(raw_data, samples, table_height, z_num, sub_dir):
         img = np.expand_dims(resize_image.data, -1)
         gp_center_int = gp_center.astype(np.int64)
         obj_height = raw_data[gp_center_int[0], gp_center_int[1]]
-        candidate_z = np.linspace(obj_height, table_height, z_num)
+        candidate_z = np.linspace(obj_height, table_height, cfg.z_num)
         for z in candidate_z:
             gqcnn_ims.append(img)
             gqcnn_depth.append(z)
