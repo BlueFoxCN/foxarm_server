@@ -8,8 +8,9 @@ from scipy import misc
 
 from cfgs.config import cfg
 
-cx, cy, fx, fy = 322.7521286, 257.23471352, 578.04136686, 580.96473333 
+# cx, cy, fx, fy = 322.7521286, 257.23471352, 578.04136686, 580.96473333 
 # cx, cy, fx, fy = 298.55645619, 242.75084457, 596.24139992, 594.00542779
+cx, cy, fx, fy = 297.33638738, 242.0229963, 595.274641, 593.10999329
 GRIPPER_WIDTH_IN_PIXEL = 30
 
 def grasp_sample(raw_data, grasp_num, sub_dir):

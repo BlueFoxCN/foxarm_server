@@ -29,26 +29,39 @@ class RecvImgThread(Thread):
     def __init__(self, conn):
         Thread.__init__(self)
         self.conn = conn
-        self.list_len = 10
-        self.imgs = [None] * self.list_len
+        self.imgs = [None] * cfg.img_list_len
         self.recv = True
 
     def run(self):
+        frame_data = []
+        img_size = cfg.img_h * cfg.img_w
+        cur_frame = [None] * img_size
+        remain_value = ()
         while self.recv:
-            frame_data = []
             line_num = 1
-            for i in range(cfg.img_h // line_num):
+            # for i in range(cfg.img_h // line_num):
+            cur_frame[:len(remain_value)] = remain_value
+            cur_idx = len(remain_value)
+            while True:
                 data = self.conn.recv(cfg.img_w * line_num * 2)
-                value = struct.unpack('<%dH' % (cfg.img_w * line_num), data)
-                frame_data.append(value)
+                value = struct.unpack('<%dH' % (len(data) / 2), data)
+                if cur_idx + len(value) >= img_size:
+                    cur_frame[cur_idx:img_size] = value[:img_size - cur_idx]
+                    remain_value = value[img_size - cur_idx:]
+                    break
+                else:
+                    cur_frame[cur_idx:cur_idx + len(value)] = value
+                    cur_idx += len(value)
 
-            frame_data = np.array(frame_data)
-            frame_data = frame_data.reshape(cfg.img_h, cfg.img_w)
+            cur_frame_ary = np.array(cur_frame).reshape(cfg.img_h, cfg.img_w)
 
             # insert data to the head of the list
-            for i in range(self.list_len - 1, 0, -1):
+            # print('receive one frame')
+            for i in range(cfg.img_list_len - 1, 0, -1):
                 self.imgs[i] = self.imgs[i-1]
-            self.imgs[0] = frame_data
+            self.imgs[0] = cur_frame_ary
+
+            frame_data = frame_data[img_size:]
 
     def stop(self):
         self.recv = False
@@ -57,10 +70,15 @@ class RecvImgThread(Thread):
         dir_path = os.path.join(cfg.save_dir, sub_dir)
         imgs_buffer = copy.deepcopy(self.imgs)
 
-        img_process = imgs_buffer[0]
-        for img in imgs_buffer[1:]:
-            arg = np.where(img_process == 0)
-            img_process[arg] = img[arg] 
+        imgs_buffer = np.array(imgs_buffer)
+        img_process = np.zeros((cfg.img_h, cfg.img_w))
+        for i in range(cfg.img_h):
+            for j in range(cfg.img_w):
+                pix_ij = imgs_buffer[:, i, j]
+                non_zero_num = np.argwhere(pix_ij != 0).shape[0]
+                if non_zero_num:
+                    img_process[i, j] = np.sum(pix_ij) / non_zero_num
+
         c = 0
         while((img_process==0).any() and c < 3):
             c += 1
@@ -73,6 +91,8 @@ class RecvImgThread(Thread):
 
         save_path = os.path.join(dir_path, 'depth.jpg')
         misc.imsave(save_path, img_process)
+        f = open(os.path.join(dir_path, 'depth.pkl'), 'wb')
+        pickle.dump(img_process, f)
         print('Done process imgs')
         return img_process
 

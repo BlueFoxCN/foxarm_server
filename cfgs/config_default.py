@@ -12,15 +12,19 @@ cfg.arm_port = 9005
 
 cfg.model_path = "model_files/gqcnn_model"
 
-cfg.crop_x_start = 250
-cfg.crop_y_start = 100
-cfg.crop_width = 200
-cfg.crop_height = 280
+cfg.crop_x_start = 165
+cfg.crop_y_start = 115
+cfg.crop_width = 240
+cfg.crop_height = 240
 
 cfg.table_height = 580
 cfg.height_bias = 145
 
+cfg.depth_bias = 25
+
 cfg.antipodal_th = 30
+
+cfg.img_list_len = 2
 
 cfg.z_num = 3
 

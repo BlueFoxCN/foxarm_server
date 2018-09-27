@@ -56,6 +56,7 @@ while True:
         sub_dir = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         os.mkdir(os.path.join(cfg.save_dir, sub_dir))
         depth_img = recv_img_thread.get_img(sub_dir)
+        depth_img += cfg.depth_bias
         # crop the img
         crop_img = depth_img[cfg.crop_y_start:cfg.crop_y_start+cfg.crop_height,
                              cfg.crop_x_start:cfg.crop_x_start+cfg.crop_width]
@@ -91,14 +92,14 @@ while True:
                       (0, 0, 255),
                       3)
         cv2.imwrite(os.path.join(cfg.save_dir, sub_dir, 'final.jpg'), result_img)
-        print(best_sample)
         p1_3d, p2_3d = depth2cloud(best_sample, crop_img)
 
+        print("[%.2f, %.2f, %.2f]" % (p1_3d[0], p1_3d[1], p1_3d[2]))
+        print("[%.2f, %.2f, %.2f]" % (p2_3d[0], p2_3d[1], p2_3d[2]))
         if args.debug == False:
-            sock.send('ffffff', p1_3d[0], p1_3d[1], p1_3d[2], p2_3d[0], p2_3d[1], p2_3d[2])
-        else:
-            print("[%.2f, %.2f, %.2f]" % (p1_3d[0], p1_3d[1], p1_3d[2]))
-            print("[%.2f, %.2f, %.2f]" % (p2_3d[0], p2_3d[1], p2_3d[2]))
+            data = struct.pack('ffffff', p1_3d[0], p1_3d[1], p1_3d[2], p2_3d[0], p2_3d[1], p2_3d[2])
+            conn.send(data)
+
     elif msg == 'q':
         break
 
