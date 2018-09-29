@@ -55,6 +55,8 @@ class RecvImgThread(Thread):
 
             cur_frame_ary = np.array(cur_frame).reshape(cfg.img_h, cfg.img_w)
 
+            cur_frame_ary = cur_frame_ary[cfg.crop_y_start:cfg.crop_y_start+cfg.crop_height,
+                                          cfg.crop_x_start:cfg.crop_x_start+cfg.crop_width]
             # insert data to the head of the list
             # print('receive one frame')
             for i in range(cfg.img_list_len - 1, 0, -1):
@@ -71,12 +73,12 @@ class RecvImgThread(Thread):
         imgs_buffer = copy.deepcopy(self.imgs)
 
         imgs_buffer = np.array(imgs_buffer)
-        img_process = np.zeros((cfg.img_h, cfg.img_w))
+        # img_process = np.zeros((cfg.img_h, cfg.img_w))
 
-        mask = np.where(imgs_buffer==0, 0, 1)
-        mask = np.sum(mask, 0)
-        mask[mask==0] = 1
-        img_process = np.sum(imgs_buffer, 0) / mask
+        imgs_sum = np.sum(imgs_buffer, 0)
+        eff_pt_num = np.sum((imgs_buffer != 0).astype(np.int), 0)
+        pt_num = np.maximum(np.ones_like(eff_pt_num), eff_pt_num)
+        img_process = imgs_sum / pt_num
 
         done_avg = time.time()
 

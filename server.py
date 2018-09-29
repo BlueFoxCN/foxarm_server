@@ -71,11 +71,11 @@ while True:
 
         depth_img += cfg.depth_bias
         # crop the img
-        crop_img = depth_img[cfg.crop_y_start:cfg.crop_y_start+cfg.crop_height,
-                             cfg.crop_x_start:cfg.crop_x_start+cfg.crop_width]
+        # crop_img = depth_img[cfg.crop_y_start:cfg.crop_y_start+cfg.crop_height,
+        #                      cfg.crop_x_start:cfg.crop_x_start+cfg.crop_width]
         # sample grasps
         sample_start = time.time()
-        samples, binary_img = grasp_sample(crop_img,
+        samples, binary_img = grasp_sample(depth_img,
                                            grasp_num=10,
                                            sub_dir=sub_dir)
         done_sample = time.time()
@@ -86,7 +86,7 @@ while True:
         # print('vis time: %g' % (done_vis - done_sample))
 
         # align the grasps and run the model
-        gqcnn_imgs, gqcnn_depths = align(crop_img,
+        gqcnn_imgs, gqcnn_depths = align(depth_img,
                                          samples,
                                          table_height=cfg.table_height,
                                          sub_dir=sub_dir)
@@ -100,7 +100,7 @@ while True:
 
         # choose the best sample, and transform it and send through tcp socket
         best_sample = samples[np.argmax(prediction[0][:, -1]) // cfg.z_num]
-        result_img = cv2.cvtColor(np.expand_dims(crop_img, -1).astype(np.uint8), cv2.COLOR_GRAY2BGR)
+        result_img = cv2.cvtColor(np.expand_dims(depth_img, -1).astype(np.uint8), cv2.COLOR_GRAY2BGR)
         p1 = best_sample[0][0:2]
         p2 = best_sample[1][0:2]
         cv2.rectangle(result_img,
@@ -114,7 +114,7 @@ while True:
                       (0, 0, 255),
                       3)
         cv2.imwrite(os.path.join(cfg.save_dir, sub_dir, 'final.jpg'), result_img)
-        p1_3d, p2_3d = depth2cloud(best_sample, crop_img)
+        p1_3d, p2_3d = depth2cloud(best_sample, depth_img)
 
         print("[%.2f, %.2f, %.2f]" % (p1_3d[0], p1_3d[1], p1_3d[2]))
         print("[%.2f, %.2f, %.2f]" % (p2_3d[0], p2_3d[1], p2_3d[2]))
