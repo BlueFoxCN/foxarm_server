@@ -9,3 +9,5 @@ data
 code_gqcnn
 model_files
 whole_pro_data*
+*.swp
+exp

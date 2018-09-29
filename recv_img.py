@@ -72,15 +72,16 @@ class RecvImgThread(Thread):
 
         imgs_buffer = np.array(imgs_buffer)
         img_process = np.zeros((cfg.img_h, cfg.img_w))
-        for i in range(cfg.img_h):
-            for j in range(cfg.img_w):
-                pix_ij = imgs_buffer[:, i, j]
-                non_zero_num = np.argwhere(pix_ij != 0).shape[0]
-                if non_zero_num:
-                    img_process[i, j] = np.sum(pix_ij) / non_zero_num
+
+        mask = np.where(imgs_buffer==0, 0, 1)
+        mask = np.sum(mask, 0)
+        mask[mask==0] = 1
+        img_process = np.sum(imgs_buffer, 0) / mask
+
+        done_avg = time.time()
 
         c = 0
-        while((img_process==0).any() and c < 3):
+        while((img_process==0).any() and c < 2):
             c += 1
             pad_arg = np.argwhere(img_process==0)
             for i, j in pad_arg:
@@ -88,6 +89,8 @@ class RecvImgThread(Thread):
                 num = np.argwhere(grid!=0).shape[0]
                 if num:
                     img_process[i, j] = int(np.sum(grid) / num)
+
+        print('pad time: %g' % (time.time() - done_avg))
 
         save_path = os.path.join(dir_path, 'depth.jpg')
         misc.imsave(save_path, img_process)
